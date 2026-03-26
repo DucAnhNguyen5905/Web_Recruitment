@@ -1,0 +1,19 @@
+﻿@{
+    ViewData["Title"] = "Privacy Policy";
+    var model = new PageModel
+    {
+        PageTitle = "Privacy"
+    };
+}
+<h1>@ViewData["Title"]</h1>
+ @Html.Partial("~/Views/Partial/_CommonPartialView.cshtml",model) 
+
+<p>Use this page to detail your site's privacy policy.</p>
+
+@* <div id="PrivacyPartialViews"> </div>
+@section Scripts {                                                               
+    <script type="text/javascript">                                              
+        $(document).ready(function () {                                          
+            MyscriptCtrl.LoadPartialViews("PrivacyPartialViews","Privacy Page"); 
+        });                                                                      
+    </script>    *@                                                               

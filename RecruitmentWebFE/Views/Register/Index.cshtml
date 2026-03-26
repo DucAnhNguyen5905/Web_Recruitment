@@ -1,0 +1,72 @@
+﻿@{
+    Layout = "~/Views/Shared/_RegisterLayout.cshtml";
+}
+@model RecruitmentWebFE.Models.RegisterViewModel
+
+<div class="card-body register-card-body">
+    <p class="register-box-msg">Register a new membership</p>
+
+    <form asp-action="Index" method="post">
+
+        <!-- EMAIL -->
+        <div class="input-group mb-3">
+            <input asp-for="Email" class="form-control" placeholder="Email">
+            <div class="input-group-text">
+                <span class="bi bi-envelope"></span>
+            </div>
+        </div>
+        <span asp-validation-for="Email" class="text-danger small d-block"></span>
+
+
+        <!-- PASSWORD -->
+        <div class="input-group mb-3">
+            <input asp-for="Password" type="password" class="form-control" placeholder="Password">
+            <div class="input-group-text">
+                <span class="bi bi-lock-fill"></span>
+            </div>
+        </div>
+        <span asp-validation-for="Password" class="text-danger small d-block"></span>
+
+
+        <!-- CONFIRM PASSWORD -->
+        <div class="input-group mb-3">
+            <input asp-for="ConfirmPassword" type="password" class="form-control" placeholder="Confirm Password">
+            <div class="input-group-text">
+                <span class="bi bi-lock"></span>
+            </div>
+        </div>
+        <span asp-validation-for="ConfirmPassword" class="text-danger small d-block"></span>
+
+
+        <!-- BUTTON -->
+        <div class="d-grid mb-3">
+            <button type="submit" class="btn btn-primary">
+                Register
+            </button>
+        </div>
+
+    </form>
+
+    <!-- SOCIAL LOGIN -->
+    <div class="social-auth-links text-center mb-3 d-grid gap-2">
+        <p>- OR -</p>
+
+        <a href="#" class="btn btn-primary">
+            <i class="bi bi-facebook me-2"></i> Sign in using Facebook
+        </a>
+
+        <a href="#" class="btn btn-danger">
+            <i class="bi bi-google me-2"></i> Sign in using Google+
+        </a>
+    </div>
+
+    <!-- LOGIN LINK -->
+    <p class="mb-0 text-center">
+        @Html.ActionLink("I already have a membership", "Index", "Login")
+    </p>
+</div>
+
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

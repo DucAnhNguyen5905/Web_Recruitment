@@ -1,0 +1,53 @@
+﻿@model RecruitmentWebFE.Models.UpdatePostViewModel
+
+@{
+    ViewData["Title"] = "Sửa bài đăng";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-4">
+    <h2>Sửa bài đăng</h2>
+
+    <form asp-action="Edit" method="post">
+        @Html.AntiForgeryToken()
+        <input asp-for="Id" type="hidden" />
+
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+        <div class="mb-3">
+            <label asp-for="JobTitle" class="form-label"></label>
+            <input asp-for="JobTitle" class="form-control" />
+            <span asp-validation-for="JobTitle" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="JobDescription" class="form-label"></label>
+            <textarea asp-for="JobDescription" class="form-control" rows="4"></textarea>
+            <span asp-validation-for="JobDescription" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="JobLocation" class="form-label"></label>
+            <input asp-for="JobLocation" class="form-control" />
+            <span asp-validation-for="JobLocation" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Salary" class="form-label"></label>
+            <input asp-for="Salary" class="form-control" />
+            <span asp-validation-for="Salary" class="text-danger"></span>
+        </div>
+
+        <div class="form-check mb-3">
+            <input asp-for="IsActive" class="form-check-input" />
+            <label asp-for="IsActive" class="form-check-label"></label>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Cập nhật</button>
+        <a asp-action="Index" class="btn btn-secondary">Quay lại</a>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

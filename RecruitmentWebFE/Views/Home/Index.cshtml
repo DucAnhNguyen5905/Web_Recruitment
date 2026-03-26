@@ -1,0 +1,43 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Home Page";
+    var model = new PageModel{PageTitle = "Home Page"};
+}
+@Html.AntiForgeryToken()
+<div class="app-content-header">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-sm-6">
+                <h3 class="mb-0">Xin Chào</h3>
+            </div>
+        </div>
+    </div>
+</div>
+@* @Html.Partial("~/Views/Partial/_CommonPartialView.cshtml", model)     *@
+<div id="My Partial Views">  </div>
+
+<div class="app-content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Đây là Home Page</h3>
+                    </div>
+                    <div class="card-body">
+                        <p>Hello World !!!!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="HomePartialViews"> </div>
+
+@section Scripts {
+    <script type="text/javascript">
+        $(document).ready(function () {
+            MyscriptCtrl.LoadPartialViews("HomePartialViews","Home Page");
+        });
+    </script>
+}

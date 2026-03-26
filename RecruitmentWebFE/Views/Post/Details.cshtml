@@ -1,0 +1,46 @@
+﻿@model RecruitmentWebFE.Models.PostViewsModel
+
+@{
+    ViewData["Title"] = "Chi tiết bài đăng";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-4">
+    <h2>Chi tiết bài đăng</h2>
+
+    <div class="card">
+        <table class="table table-bordered" role="table">
+                      <thead>
+                        <tr>
+                          <th style="width: 10px" scope="col">Post_ID</th>
+                          <th scope="col">Job_Title</th>
+                          <th scope="col">Progress</th>
+                          <th style="width: 40px" scope="col">Label</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                          @if(Model != null)
+                          {
+                             @*  <tr class="align-middle">
+                                  <td>@Model.Post_ID</td>
+                                  <td>@Model.Job_Title</td>
+                                  <td>
+                                    <div class="progress progress-xs">
+                                      <div class="progress-bar progress-bar-danger" style="width: 55%"></div>
+                                    </div>
+                                  </td>
+                                  <td> <a asp-action="Edit" asp-route-id="@Model.Post_ID" class="btn btn-warning">Sửa</a></td>
+                                </tr> *@
+                          })
+
+                       
+                       
+                      </tbody>
+                    </table>
+        
+    </div>
+
+    <div class="mt-3">
+        <a asp-action="Index" class="btn btn-secondary">Quay lại</a>
+    </div>
+</div>
