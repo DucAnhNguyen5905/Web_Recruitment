@@ -1,7 +1,10 @@
-﻿using System.Net.Http.Headers;
+﻿using RecruitmentWebFE.Models;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using System.Text;
 using System.Text.Json;
-using RecruitmentWebFE.Models;
+using Recuitment_Common;
+
 
 namespace RecruitmentWebFE.Services
 {
@@ -10,6 +13,7 @@ namespace RecruitmentWebFE.Services
         private readonly HttpClient _httpClient;
         private readonly IConfiguration _configuration;
 
+        
         public PostService(HttpClient httpClient, IConfiguration configuration)
         {
             _httpClient = httpClient;
@@ -32,14 +36,14 @@ namespace RecruitmentWebFE.Services
                 Search = null,
                 SortBy = null,
                 SortOrder = null,
-                PostStatus = null,
-                FromDate = null,
-                ToDate = null
+                PostStatus = 0,
+                FromDate = new DateTime(2000, 1, 1),
+                ToDate = new DateTime(2030, 1, 1)
             };
 
-            var response = await _httpClient.PostAsJsonAsync(
-                $"{BaseUrl}/api/jobpost/getall",
-                request
+            var response = await HttpHelper.SendHttpRequestAsync( HttpMethod.Get,
+                $"{BaseUrl}/api/jobpost/getAll",
+                accessToken
             );
 
             var raw = await response.Content.ReadAsStringAsync();
@@ -59,10 +63,11 @@ namespace RecruitmentWebFE.Services
 
         public async Task<PostViewsModel?> GetByIdAsync(int id, string accessToken)
         {
-            _httpClient.DefaultRequestHeaders.Authorization =
-                new AuthenticationHeaderValue("Bearer", accessToken);
+            var response = await HttpHelper.SendHttpRequestAsync(
+        HttpMethod.Get,
+        $"{BaseUrl}/api/jobpost/{id}",
+        accessToken);
 
-            var response = await _httpClient.GetAsync($"{BaseUrl}/api/jobpost/{id}");
             var raw = await response.Content.ReadAsStringAsync();
 
             if (!response.IsSuccessStatusCode)
@@ -87,19 +92,22 @@ namespace RecruitmentWebFE.Services
 
         public async Task<bool> UpdateAsync(UpdatePostViewModel model, string accessToken)
         {
-            _httpClient.DefaultRequestHeaders.Authorization =
-                new AuthenticationHeaderValue("Bearer", accessToken);
+            var response = await HttpHelper.SendHttpRequestAsync(
+                HttpMethod.Put,
+                $"{BaseUrl}/api/jobpost/{model.Id}",
+                accessToken,
+                model);
 
-            var response = await _httpClient.PutAsJsonAsync($"{BaseUrl}/api/jobpost/{model.Id}", model);
             return response.IsSuccessStatusCode;
         }
 
         public async Task<bool> DeleteAsync(int id, string accessToken)
         {
-            _httpClient.DefaultRequestHeaders.Authorization =
-                new AuthenticationHeaderValue("Bearer", accessToken);
+            var response = await HttpHelper.SendHttpRequestAsync(
+                HttpMethod.Delete,
+                $"{BaseUrl}/api/jobpost/{id}",
+                accessToken);
 
-            var response = await _httpClient.DeleteAsync($"{BaseUrl}/api/jobpost/{id}");
             return response.IsSuccessStatusCode;
         }
     }

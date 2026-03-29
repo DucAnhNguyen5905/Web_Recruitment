@@ -41,7 +41,8 @@ namespace RecruitmentWebFE.Controllers
             {
                 _logger.LogError(ex, "Lỗi khi tải danh sách bài đăng.");
                 TempData["ErrorMessage"] = "Không thể tải danh sách bài đăng.";
-                return View(new List<PostViewsModel>());
+                //return View(new List<PostViewsModel>());
+                return Content("Error: " + ex.Message);
             }
             
         }

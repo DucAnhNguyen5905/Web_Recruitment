@@ -1,17 +1,15 @@
 ﻿using RecruitmentWebFE.Models;
 using System.Net.Http.Json;
+using Recuitment_Common;
+using System.Buffers.Text;
+using System.Net.Http;
 
 namespace RecruitmentWebFE.Services
 {
     public class EmployerService
     {
-        private readonly HttpClient _httpClient;
-        private const string LoginUrl = "http://localhost:5108/api/employer/login";
-
-        public EmployerService(HttpClient httpClient)
-        {
-            _httpClient = httpClient;
-        }
+        
+        private const string LoginUrl = "http://localhost:5108/api/employer";
 
         public async Task<LoginResponse?> Login(string email, string password)
         {
@@ -20,8 +18,13 @@ namespace RecruitmentWebFE.Services
                 email,
                 password
             };
-
-            var response = await _httpClient.PostAsJsonAsync(LoginUrl, request);
+            
+            var response = await HttpHelper.SendPostAsync(
+                    HttpMethod.Post,
+                $"{LoginUrl}/login",
+                null,
+                   request
+                );
 
             if (!response.IsSuccessStatusCode)
             {

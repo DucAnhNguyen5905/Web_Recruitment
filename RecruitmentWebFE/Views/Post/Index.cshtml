@@ -10,7 +10,12 @@
         <h2>Danh sách bài đăng</h2>
         <a asp-controller="Post" asp-action="Create" class="btn btn-success">Tạo bài đăng mới</a>
     </div>
-
+    @if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["ErrorMessage"]
+    </div>
+}
     @if (Model == null || !Model.Any())
     {
         <div class="alert alert-info">
