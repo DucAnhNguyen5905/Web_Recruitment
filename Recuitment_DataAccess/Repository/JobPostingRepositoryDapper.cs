@@ -102,13 +102,15 @@ namespace Recuitment_DataAccess.Repository
                 param.Add("@Job_Type_List", requestData.Job_Type_List); 
                 param.Add("@Job_Category_List", requestData.Job_Category_List);
                 param.Add("@PostStatus", requestData.PostStatus);
-                param.Add("@FromDate", requestData.FromDate == default(DateTime) ? new DateTime(2000, 1, 1) : requestData.FromDate);
-                param.Add("@ToDate", requestData.ToDate == default(DateTime) ? DateTime.Now : requestData.ToDate);
+                param.Add("@FromDate", requestData.FromDate ?? new DateTime(2000, 1, 1));
+                param.Add("@ToDate", requestData.ToDate ?? new DateTime(2030, 1, 1));
 
                 param.Add("@Search", requestData.Search);
                 param.Add("@SortBy", requestData.SortBy);
                 param.Add("@SortOrder", requestData.SortOrder);
 
+                param.Add("@CurrentEmployerID", requestData.CurrentEmployerID);
+                param.Add("@IsAdmin", requestData.IsAdmin);
                 list = await DbConnection.QueryAsync<JobPost>("SP_JobPost_GetAll", param);
                 return list;
             }

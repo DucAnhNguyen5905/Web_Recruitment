@@ -152,6 +152,7 @@ namespace Recruitment_API.Controllers
                 {
                     new Claim(ClaimTypes.Email, resultlogin.Email),
                     new Claim(ClaimTypes.PrimarySid, resultlogin.Employer_ID.ToString()),
+                    new Claim("IsAdmin", (resultlogin.IsAdmin ?? 0).ToString()),
                     new Claim(ClaimTypes.GivenName, resultlogin.FullName ?? "")
                 };
 
@@ -194,7 +195,7 @@ namespace Recruitment_API.Controllers
             try
             {
                 var EmployerID = UserMana_Session.Employer_ID;
-                var keyCache = "User_sessions_" + EmployerID + "_" + requestData.DeviceID;
+                var keyCache = $"User_Sessions_{EmployerID}_{requestData.DeviceID}";
 
                 _cache.Remove(keyCache);
 
@@ -208,15 +209,15 @@ namespace Recruitment_API.Controllers
 
         private JwtSecurityToken CreateToken(List<Claim> authClaims)
         {
-            var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:SecretKey"]));
+            var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:SecretKey"]));
 
-            _ = int.TryParse(_configuration["JWT:TokenValidityInMinutes"], out int tokenValidityInMinutes);
+            _ = int.TryParse(_configuration["Jwt:TokenValidityInMinutes"], out int tokenValidityInMinutes);
 
             var token = new JwtSecurityToken(
 
-                issuer: _configuration["JWT:ValidIssuer"],
+                issuer: _configuration["Jwt:ValidIssuer"],
 
-                audience: _configuration["JWT:ValidAudience"],
+                audience: _configuration["Jwt:ValidAudience"],
 
                 expires: DateTime.Now.AddMinutes(tokenValidityInMinutes),
 

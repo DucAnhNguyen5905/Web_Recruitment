@@ -40,15 +40,26 @@
                 @foreach (var post in Model)
                 {
                     <tr class="align-middle">
-                                  <td>@post.Post_ID</td>
-                                  <td>@post.Job_Title</td>
-                                  <td>
-                                    <div class="progress progress-xs">
-                                      <div class="progress-bar progress-bar-danger" style="width: 55%"></div>
-                                    </div>
-                                  </td>
-                                  <td> <a asp-action="Edit" asp-route-id="@post.Post_ID" class="btn btn-warning">Sửa</a></td>
-                                </tr>
+                          <td>@post.Post_ID</td>
+                          <td>@post.Job_Title</td>
+                          <td> Chưa có Location </td>
+                          <td>@string.Format("{0:N0} - {1:N0}", post.Salary_min, post.Salary_max)</td>
+                          <td>@post.Created_at.ToString("đd/MM/yy")</td>
+                          <td>
+                              @(post.PostStatus == 1 ? "Open" : "Close")
+                          </td>
+                            <td>
+                                <a asp-controller="Post" asp-action="Edit" asp-route-id="@post.Post_ID" class="btn btn-primary btn-sm">Update</a>
+                                <a asp-controller="Post" asp-action="Details" asp-route-id="@post.Post_ID" class="btn btn-info btn-sm">Details</a>
+
+                                <form asp-controller="Post" asp-action="Delete" asp-route-id="@post.Post_ID" method="post" style="display:inline;">
+                                       @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure want to delete this post ?');">
+                                        Delete
+                                    </button>
+                                </form>
+                            </td>
+                       </tr>
                    
                 }
             </tbody>

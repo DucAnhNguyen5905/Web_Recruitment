@@ -24,11 +24,11 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 {
     options.TokenValidationParameters = new TokenValidationParameters
     {
-        ValidateIssuer = false,
-        ValidateAudience = false,
+        ValidateIssuer = true,
+        ValidateAudience = true,
 
-        ValidateLifetime = false,
-        ValidateIssuerSigningKey = false,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
 
         ValidIssuer = builder.Configuration["Jwt:ValidIssuer"],
         ValidAudience = builder.Configuration["Jwt:ValidAudience"],
@@ -38,7 +38,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     };
 
 });
-
+builder.Services.AddAuthorization();
 builder.Services.AddStackExchangeRedisCache(options =>
 {
     options.Configuration = configuration["RedisCacheUrl"];
@@ -65,7 +65,7 @@ var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+    
     app.UseSwagger(); 
     app.UseSwaggerUI(); 
 }

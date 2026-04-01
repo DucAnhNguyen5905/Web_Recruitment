@@ -14,13 +14,15 @@ namespace Recuitment_Common
         private static readonly HttpClient _httpClient = new HttpClient();
 
 
-        public static async Task<HttpResponseMessage> SendHttpRequestAsync(HttpMethod method, string url, string accessToken, object? body = null)
+        public static async Task<HttpResponseMessage> SendHttpRequestAsync(HttpMethod method, string url, string? accessToken, object? body = null)
         {
-            _httpClient.DefaultRequestHeaders.Authorization =
-         new AuthenticationHeaderValue("Bearer", accessToken);
 
             using var request = new HttpRequestMessage(method, url);
-
+            if (!string.IsNullOrWhiteSpace(accessToken))
+            {
+                request.Headers.Authorization =
+                    new AuthenticationHeaderValue("Bearer", accessToken);
+            }
             if (body != null)
             {
                 request.Content = new StringContent(
@@ -32,22 +34,22 @@ namespace Recuitment_Common
             return await _httpClient.SendAsync(request);
         }
 
-        public static Task<HttpResponseMessage> SendGetAsync(HttpMethod method, string url, string accessToken, object? body = null)
+        public static Task<HttpResponseMessage> SendGetAsync(HttpMethod method, string url, string? accessToken, object? body = null)
         {
             return SendHttpRequestAsync(method, url, accessToken, body);
         }
 
-        public static Task<HttpResponseMessage> SendPostAsync(HttpMethod method, string url, string accessToken, object? body = null)
+        public static Task<HttpResponseMessage> SendPostAsync(HttpMethod method, string url, string? accessToken, object? body = null)
         {
             return SendHttpRequestAsync(method, url, accessToken, body);
         }
 
-        public static Task<HttpResponseMessage> SendPutAsync(HttpMethod method, string url, string accessToken, object? body = null)
+        public static Task<HttpResponseMessage> SendPutAsync(HttpMethod method, string url, string? accessToken, object? body = null)
         {
             return SendHttpRequestAsync(method, url, accessToken, body);
         }
 
-        public static Task<HttpResponseMessage> SendDeleteAsync(HttpMethod method, string url, string accessToken, object? body = null)
+        public static Task<HttpResponseMessage> SendDeleteAsync(HttpMethod method, string url, string? accessToken, object? body = null)
         {
             return SendHttpRequestAsync(method, url, accessToken, body);
         }

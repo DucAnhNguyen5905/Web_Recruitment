@@ -22,7 +22,8 @@ namespace Recuitment_DataAccess.Data_Object.RequestData
 
         public int PostStatus { get; set; }
 
-
+        public int CurrentEmployerID { get; set; }
+        public int IsAdmin { get; set; }
         public DateTime? FromDate { get; set; }
 
         public DateTime? ToDate { get; set; }

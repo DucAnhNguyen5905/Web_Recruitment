@@ -23,7 +23,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     });
 
 builder.Services.AddAuthorization();
-builder.Services.AddHttpClient<EmployerService>();
+builder.Services.AddScoped<EmployerService>();
 builder.Services.AddHttpClient<PostService>();
 builder.Services.AddHttpContextAccessor();
 

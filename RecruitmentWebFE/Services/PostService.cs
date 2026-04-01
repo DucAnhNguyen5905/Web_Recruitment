@@ -41,9 +41,10 @@ namespace RecruitmentWebFE.Services
                 ToDate = new DateTime(2030, 1, 1)
             };
 
-            var response = await HttpHelper.SendHttpRequestAsync( HttpMethod.Get,
+            var response = await HttpHelper.SendHttpRequestAsync( HttpMethod.Post,
                 $"{BaseUrl}/api/jobpost/getAll",
-                accessToken
+                accessToken,
+                request
             );
 
             var raw = await response.Content.ReadAsStringAsync();

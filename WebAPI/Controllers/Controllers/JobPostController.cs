@@ -3,9 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
-using Org.BouncyCastle.Asn1.Ocsp;
 using Recruitment_Common;
-using Recuitment_Common;
 using Recuitment_DataAccess.Data_Object;
 using Recuitment_DataAccess.Data_Object.RequestData;
 using Recuitment_DataAccess.IRepository;
@@ -16,6 +14,8 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using WebAPI.Filter;
+using Microsoft.AspNetCore.Authorization;
+
 
 namespace Recruitment_API.Controllers
 {
@@ -39,37 +39,61 @@ namespace Recruitment_API.Controllers
             _logger = logger;
         }
 
+        [Authorize]
         [HttpPost("/api/jobpost/getAll")]
         [RecuitmentAuthorizeAttribute("Get_All_JobPosts", "ISVIEWS")]
         public async Task<IActionResult> Get_All_JobPosts([FromBody] JobPostGetAll_Request jobPostGetAll_Request)
         {
             try
             {
-                var cacheKey = "JobPostGetAll_KeyCaching_" + jobPostGetAll_Request.Post_ID_List;
-                var cachedData = await _cache.GetStringAsync(cacheKey);
-                var result = new List<JobPost>();
+                var employerIdClaim = User.FindFirst(ClaimTypes.PrimarySid)?.Value;
+                if (!int.TryParse(employerIdClaim, out int currentEmployerId))
+                {
+                    return Unauthorized(new { error = "Token không hợp lệ." });
+                }
 
+                var isAdminClaim = User.FindFirst("IsAdmin")?.Value ?? "0";
+                bool isAdmin = isAdminClaim == "1";
+
+                // inject dữ liệu từ token xuống request
+                jobPostGetAll_Request.CurrentEmployerID = currentEmployerId;
+                jobPostGetAll_Request.IsAdmin = isAdmin ? 1 : 0;
+
+                // employer thường không được tự truyền employer list
+                if (!isAdmin)
+                {
+                    jobPostGetAll_Request.Employer_ID_List = null;
+                }
+
+                var cacheKey =
+                    $"JobPostGetAll_User_{currentEmployerId}_Admin_{jobPostGetAll_Request.IsAdmin}_" +
+                    $"{jobPostGetAll_Request.Post_ID_List}_{jobPostGetAll_Request.Job_Type_List}_" +
+                    $"{jobPostGetAll_Request.Job_Category_List}_{jobPostGetAll_Request.Search}_" +
+                    $"{jobPostGetAll_Request.SortBy}_{jobPostGetAll_Request.SortOrder}_" +
+                    $"{jobPostGetAll_Request.PostStatus}_{jobPostGetAll_Request.FromDate}_{jobPostGetAll_Request.ToDate}_" +
+                    $"{jobPostGetAll_Request.Employer_ID_List}";
+
+                var cachedData = await _cache.GetStringAsync(cacheKey);
                 if (cachedData != null)
                 {
                     var cachedResult = System.Text.Json.JsonSerializer.Deserialize<List<JobPost>>(cachedData);
-                    return Ok(cachedResult); // Trả về dữ liệu từ cache nếu có
+                    return Ok(cachedResult);
                 }
 
-                result = await _jobpostingRepositoryDapper.Get_All_JobPosts(jobPostGetAll_Request);
+                var result = await _jobpostingRepositoryDapper.Get_All_JobPosts(jobPostGetAll_Request);
 
-                if (result == null)
-
+                if (result == null || result.Count == 0)
                 {
-                    return NotFound();
+                    return Ok(new List<JobPost>());
                 }
 
                 var cacheOptions = new DistributedCacheEntryOptions()
                     .SetSlidingExpiration(TimeSpan.FromMinutes(5))
-                    .SetAbsoluteExpiration(DateTime.Now.AddMinutes(1));
+                    .SetAbsoluteExpiration(TimeSpan.FromMinutes(5));
 
                 await _cache.SetStringAsync(cacheKey, JsonConvert.SerializeObject(result), cacheOptions);
 
-                return Ok(result); // Trả về danh sách bài đăng công việc
+                return Ok(result);
             }
             catch (Exception ex)
             {
