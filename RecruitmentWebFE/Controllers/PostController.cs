@@ -29,20 +29,17 @@ namespace RecruitmentWebFE.Controllers
                 }
 
                 var posts = await _postService.GetAllPostsAsync(accessToken);
-                if (posts == null)
-                {
-                    TempData["ErrorMessage"] = "Không tìm thấy bài đăng.";
-                    return RedirectToAction(nameof(Index));
-                }
 
-                return View(posts);
+                TempData.Remove("ErrorMessage");
+
+                return View(posts ?? new List<PostViewsModel>());
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Lỗi khi tải danh sách bài đăng.");
                 TempData["ErrorMessage"] = "Không thể tải danh sách bài đăng.";
-                //return View(new List<PostViewsModel>());
-                return Content("Error: " + ex.Message);
+                return View(new List<PostViewsModel>());
+                
             }
             
         }

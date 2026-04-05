@@ -100,16 +100,34 @@ namespace Recruitment_API.Controllers
                 return StatusCode(500, new { error = "Lỗi khi lấy danh sách bài đăng công việc: " + ex.Message });
             }
         }
-
+        [Authorize]
         [HttpGet("{id}")]
         public async Task<IActionResult> Get_JobPost_ByID(int id)
         {
             var result = await _jobpostingRepositoryDapper.Get_JobPost_By_Id(new JobPostGetById_Request { Post_ID = id });
-            if (result == null || result.Count == 0)
+            var post = result?.FirstOrDefault();
+            if (post == null)
             {
-                return NotFound(new { error = "Post ID not found !!!." });
+                return NotFound(new { error = "Post not found !!!." });
             }
-            return Ok(result);
+            
+
+            var employerIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.PrimarySid)?.Value;
+            var isAdminClaim = User.FindFirst("IsAdmin")?.Value ?? "0";
+
+            if (!int.TryParse(employerIdClaim, out int currentEmployerId))
+            {
+                return Unauthorized(new { error = "Token không hợp lệ." });
+            }
+
+            bool isAdmin = isAdminClaim == "1";
+
+            if (!isAdmin && post.Employer_ID != currentEmployerId)
+            {
+                return Forbid();
+            }
+
+            return Ok(post);
         }
 
 

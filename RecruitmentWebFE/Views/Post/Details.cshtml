@@ -6,41 +6,100 @@
 }
 
 <div class="container mt-4">
-    <h2>Chi tiết bài đăng</h2>
-
-    <div class="card">
-        <table class="table table-bordered" role="table">
-                      <thead>
-                        <tr>
-                          <th style="width: 10px" scope="col">Post_ID</th>
-                          <th scope="col">Job_Title</th>
-                          <th scope="col">Progress</th>
-                          <th style="width: 40px" scope="col">Label</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                          @if(Model != null)
-                          {
-                             @*  <tr class="align-middle">
-                                  <td>@Model.Post_ID</td>
-                                  <td>@Model.Job_Title</td>
-                                  <td>
-                                    <div class="progress progress-xs">
-                                      <div class="progress-bar progress-bar-danger" style="width: 55%"></div>
-                                    </div>
-                                  </td>
-                                  <td> <a asp-action="Edit" asp-route-id="@Model.Post_ID" class="btn btn-warning">Sửa</a></td>
-                                </tr> *@
-                          })
-
-                       
-                       
-                      </tbody>
-                    </table>
-        
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>Chi tiết bài đăng</h2>
+        <a asp-controller="Post" asp-action="Index" class="btn btn-secondary">Quay lại</a>
     </div>
 
-    <div class="mt-3">
-        <a asp-action="Index" class="btn btn-secondary">Quay lại</a>
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <table class="table table-bordered">
+
+                <tr>
+                    <th>Employer ID</th>
+                    <td>@Model.Employer_ID</td>
+                </tr>
+                <tr>
+                    <th>Tiêu đề</th>
+                    <td>@Model.Job_Title</td>
+                </tr>
+                <tr>
+                    <th>Mô tả công việc</th>
+                    <td>@Model.Job_Description</td>
+                </tr>
+                <tr>
+                    <th>Yêu cầu công việc</th>
+                    <td>@Model.Job_Requirements</td>
+                </tr>
+                <tr>
+                    <th>Lương</th>
+                    <td>@string.Format("{0:N0} - {1:N0}", Model.Salary_min, Model.Salary_max)</td>
+                </tr>
+                <tr>
+                    <th>Ngày tạo</th>
+                    <td>@Model.Created_at.ToString("dd/MM/yyyy HH:mm:ss")</td>
+                </tr>
+                <tr>
+                    <th>Hạn nộp</th>
+                    <td>@Model.Expiry_Date.ToString("dd/MM/yyyy HH:mm:ss")</td>
+                </tr>
+                <tr>
+                    <th>Hình thức liên hệ</th>
+                    <td>@Model.Contact_Type</td>
+                </tr>
+                <tr>
+                    <th>Loại công việc</th>
+                    <td>@Model.Job_Type</td>
+                </tr>
+                <tr>
+                    <th>Danh mục</th>
+                    <td>@Model.Job_Category_Name</td>
+                </tr>
+                <tr>
+                    <th>Vị trí</th>
+                    <td>@Model.Position</td>
+                </tr>
+                <tr>
+                    <th>Ngôn ngữ CV</th>
+                    <td>@Model.Language</td>
+                </tr>
+                <tr>
+                    <th>Trạng thái</th>
+                    <td>@(Model.PostStatus == 1 ? "Open" : "Close")</td>
+                </tr>
+
+                @if (!string.IsNullOrWhiteSpace(Model.Keywords))
+                {
+                    <tr>
+                        <th>Từ khóa</th>
+                        <td>@Model.Keywords</td>
+                    </tr>
+                }
+
+                @if (!string.IsNullOrWhiteSpace(Model.Locations))
+                {
+                    <tr>
+                        <th>Địa điểm</th>
+                        <td>@Model.Locations</td>
+                    </tr>
+                }
+
+                @if (!string.IsNullOrWhiteSpace(Model.Keyword_IDs))
+                {
+                    <tr>
+                        <th>Keyword IDs</th>
+                        <td>@Model.Keyword_IDs</td>
+                    </tr>
+                }
+
+                @if (!string.IsNullOrWhiteSpace(Model.OfficeAddress_IDs))
+                {
+                    <tr>
+                        <th>Office Address IDs</th>
+                        <td>@Model.OfficeAddress_IDs</td>
+                    </tr>
+                }
+            </table>
+        </div>
     </div>
 </div>
