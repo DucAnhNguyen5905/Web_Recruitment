@@ -84,10 +84,32 @@ namespace RecruitmentWebFE.Services
 
         public async Task<bool> CreateAsync(CreatePostViewModel model, string accessToken)
         {
-            _httpClient.DefaultRequestHeaders.Authorization =
-                new AuthenticationHeaderValue("Bearer", accessToken);
+            var request = new
+            {
+                Employer_ID = 1, // tạm thời hard-code để test, sau sẽ lấy từ user login
+                Job_Title = model.JobTitle,
+                Job_Description = model.JobDescription,
+                Job_Requirements = model.JobRequirements,
+                Salary_min = model.SalaryMin,
+                Salary_max = model.SalaryMax,
+                Contact_Type = model.ContactType,
+                Job_Position_ID = model.JobPositionId,
+                Job_Type_ID = model.JobTypeId,
+                Job_Category_ID = model.JobCategoryId,
+                CV_Language_ID = model.CVLanguageId,
+                Office_List = model.OfficeList,
+                Keywords_List = model.KeywordsList,
+                Expiry_Date = model.ExpiryDate,
+                JobStatus = model.JobStatus
+            };
 
-            var response = await _httpClient.PostAsJsonAsync($"{BaseUrl}/api/jobpost", model);
+            var response = await HttpHelper.SendHttpRequestAsync(
+                HttpMethod.Post,
+                $"{BaseUrl}/api/jobpost/insert",
+                accessToken,
+                request
+            );
+
             return response.IsSuccessStatusCode;
         }
 

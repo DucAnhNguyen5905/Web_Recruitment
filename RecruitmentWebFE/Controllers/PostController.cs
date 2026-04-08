@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Hosting;
 using RecruitmentWebFE.Models;
 using RecruitmentWebFE.Services;
@@ -39,9 +40,9 @@ namespace RecruitmentWebFE.Controllers
                 _logger.LogError(ex, "Lỗi khi tải danh sách bài đăng.");
                 TempData["ErrorMessage"] = "Không thể tải danh sách bài đăng.";
                 return View(new List<PostViewsModel>());
-                
+
             }
-            
+
         }
 
         public async Task<IActionResult> Details(int id)
@@ -66,7 +67,47 @@ namespace RecruitmentWebFE.Controllers
         [HttpGet]
         public IActionResult Create()
         {
-            return View(new CreatePostViewModel());
+            var model = BuildDropdowns();
+            return View(model);
+        }
+        private CreatePostViewModel BuildDropdowns(CreatePostViewModel model = null)
+        {
+            model ??= new CreatePostViewModel();
+
+            model.ContactTypeOptions = new List<SelectListItem>
+            {
+                new("Email", "1"),
+                new("Phone", "2")
+            };
+
+            model.JobPositionOptions = new List<SelectListItem>
+            {
+                new("Intern", "1"),
+                new("Junior", "2"),
+                new("Senior", "3")
+            };
+
+            model.JobTypeOptions = new List<SelectListItem>
+            {
+                new("Full-time", "1"),
+                new("Part-time", "2"),
+                new("Remote", "3")
+            };
+
+            model.JobCategoryOptions = new List<SelectListItem>
+            {
+                new("IT", "1"),
+                new("Marketing", "2"),
+                new("Design", "3")
+            };
+
+            model.CVLanguageOptions = new List<SelectListItem>
+            {
+                new("English", "1"),
+                new("Vietnamese", "2")
+            };
+
+            return model;
         }
 
         [HttpPost]
@@ -75,12 +116,13 @@ namespace RecruitmentWebFE.Controllers
         {
             if (!ModelState.IsValid)
             {
+                model = BuildDropdowns(model);
                 return View(model);
             }
+
             try
             {
                 var accessToken = GetAccessToken();
-
                 if (string.IsNullOrWhiteSpace(accessToken))
                 {
                     return RedirectToAction("Index", "Login");
@@ -94,6 +136,7 @@ namespace RecruitmentWebFE.Controllers
                     return View(model);
                 }
 
+                TempData["SuccessMessage"] = "Tạo bài đăng thành công.";
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
@@ -102,7 +145,6 @@ namespace RecruitmentWebFE.Controllers
                 ModelState.AddModelError(string.Empty, "Đã xảy ra lỗi khi tạo bài đăng.");
                 return View(model);
             }
-            
         }
 
         [HttpGet]
@@ -129,7 +171,7 @@ namespace RecruitmentWebFE.Controllers
                 {
                     Id = post.Post_ID,
                     JobTitle = post.Job_Title
-                    
+
                 };
 
                 return View(model);

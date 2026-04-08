@@ -51,12 +51,14 @@ namespace RecruitmentWebFE.Controllers
                 SameSite = SameSiteMode.Lax,
                 Expires = DateTimeOffset.UtcNow.AddHours(1)
             });
+            var displayName = !string.IsNullOrWhiteSpace(result.name)
+                ? result.name
+                : $"Employer #{result.employer_ID}";
 
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, result.employer_ID.ToString()),
-                new Claim(ClaimTypes.Email, result.Email ?? ""),
-                new Claim(ClaimTypes.Name, result.Email ?? "")
+                new Claim(ClaimTypes.Name, displayName)
             };
 
             var identity = new ClaimsIdentity(
