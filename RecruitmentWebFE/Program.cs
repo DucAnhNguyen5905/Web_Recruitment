@@ -26,7 +26,7 @@ builder.Services.AddAuthorization();
 builder.Services.AddScoped<EmployerService>();
 builder.Services.AddHttpClient<PostService>();
 builder.Services.AddHttpContextAccessor();
-
+builder.Services.AddScoped<MasterDataService>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

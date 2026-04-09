@@ -1,8 +1,10 @@
 ﻿using Azure.Core;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
+using Org.BouncyCastle.Asn1.Ocsp;
 using Recruitment_Common;
 using Recuitment_DataAccess.Data_Object;
 using Recuitment_DataAccess.Data_Object.RequestData;
@@ -14,7 +16,6 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using WebAPI.Filter;
-using Microsoft.AspNetCore.Authorization;
 
 
 namespace Recruitment_API.Controllers
@@ -100,6 +101,7 @@ namespace Recruitment_API.Controllers
                 return StatusCode(500, new { error = "Lỗi khi lấy danh sách bài đăng công việc: " + ex.Message });
             }
         }
+
         [Authorize]
         [HttpGet("{id}")]
         public async Task<IActionResult> Get_JobPost_ByID(int id)
@@ -130,28 +132,39 @@ namespace Recruitment_API.Controllers
             return Ok(post);
         }
 
-
+        [Authorize]
         [HttpPost("/api/jobpost/insert")]
         public async Task<IActionResult> Insert_JobPost([FromBody] JobPostInsert_Request jobPostInsert_Request)
         {
             try
             {
+                var employerIdClaim = User.FindFirst(ClaimTypes.PrimarySid)?.Value;
+                if (!int.TryParse(employerIdClaim, out int employerId))
+                {
+                    return Unauthorized(new { error = "Token không hợp lệ." });
+                }
+
+                jobPostInsert_Request.Employer_ID = employerId;
+
                 Validate_Data.Validate_Data_JobPostInsert(jobPostInsert_Request);
+
+                var result = await _jobpostingRepositoryDapper.Jobposting_Insert(jobPostInsert_Request);
+
+                return result switch
+                {
+                    1 => Ok(new { message = "Đăng bài thành công." }),
+                    -9999 => StatusCode(500, new { error = "Lỗi khi tạo bài đăng từ store procedure." }),
+                    _ => BadRequest(new { error = $"Tạo bài đăng thất bại. ResponseCode = {result}" })
+                };
             }
             catch (ArgumentException ex)
             {
                 return BadRequest(new { error = ex.Message });
             }
-
-
-            int result = await _jobpostingRepositoryDapper.Jobposting_Insert(jobPostInsert_Request);
-
-            return result switch
+            catch (Exception ex)
             {
-                1 => Ok(new { message = "Đăng bài thành công." }),
-                -2 => Conflict(new { error = "Title đã tồn tại." }),
-                _ => StatusCode(500, new { error = "Lỗi không xác định từ server." })
-            };
+                return StatusCode(500, new { error = ex.Message });
+            }
         }
 
 

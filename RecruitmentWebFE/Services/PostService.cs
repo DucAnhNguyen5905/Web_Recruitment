@@ -1,9 +1,10 @@
 ﻿using RecruitmentWebFE.Models;
+using Recuitment_Common;
+using Recuitment_Model.RequestData;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
-using Recuitment_Common;
 
 
 namespace RecruitmentWebFE.Services
@@ -82,11 +83,15 @@ namespace RecruitmentWebFE.Services
             });
         }
 
-        public async Task<bool> CreateAsync(CreatePostViewModel model, string accessToken)
+        public async Task<(bool Success, string Message)> CreateAsync(CreatePostViewModel model, string accessToken)
         {
-            var request = new
+            if (model.SalaryMin > model.SalaryMax)
             {
-                Employer_ID = 1, // tạm thời hard-code để test, sau sẽ lấy từ user login
+                return (false, "Lương tối thiểu không được lớn hơn lương tối đa.");
+            }
+
+            var request = new JobPostInsert_Request
+            {
                 Job_Title = model.JobTitle,
                 Job_Description = model.JobDescription,
                 Job_Requirements = model.JobRequirements,
@@ -97,10 +102,14 @@ namespace RecruitmentWebFE.Services
                 Job_Type_ID = model.JobTypeId,
                 Job_Category_ID = model.JobCategoryId,
                 CV_Language_ID = model.CVLanguageId,
-                Office_List = model.OfficeList,
-                Keywords_List = model.KeywordsList,
                 Expiry_Date = model.ExpiryDate,
-                JobStatus = model.JobStatus
+                JobStatus = model.JobStatus,
+                Office_List = model.OfficeAddressIds
+                    .Select(id => new OfficeItem { OfficeAddress_ID = id })
+                    .ToList(),
+                Keywords_List = model.JobKeywordIds
+                    .Select(id => new KeywordItem { Job_Keywords_ID = id })
+                    .ToList()
             };
 
             var response = await HttpHelper.SendHttpRequestAsync(
@@ -110,7 +119,32 @@ namespace RecruitmentWebFE.Services
                 request
             );
 
-            return response.IsSuccessStatusCode;
+            var raw = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+            {
+                return (true, "Tạo bài đăng thành công.");
+            }
+
+            try
+            {
+                using var doc = JsonDocument.Parse(raw);
+
+                if (doc.RootElement.TryGetProperty("error", out var error))
+                {
+                    return (false, error.GetString() ?? "Tạo bài đăng thất bại.");
+                }
+
+                if (doc.RootElement.TryGetProperty("message", out var message))
+                {
+                    return (false, message.GetString() ?? "Tạo bài đăng thất bại.");
+                }
+            }
+            catch
+            {
+            }
+
+            return (false, $"Tạo bài đăng thất bại. HTTP {(int)response.StatusCode}");
         }
 
         public async Task<bool> UpdateAsync(UpdatePostViewModel model, string accessToken)

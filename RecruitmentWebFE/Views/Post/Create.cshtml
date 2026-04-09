@@ -5,128 +5,271 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div class="container mt-4">
-    <div class="card card-primary">
-        <div class="card-header">
-            <h3 class="card-title">Tạo bài đăng mới</h3>
-        </div>
-
-        <form asp-action="Create" method="post" id="createPostForm">
-            @Html.AntiForgeryToken()
-
-            <div class="card-body">
-                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
-
-                <div class="form-group mb-3">
-                    <label asp-for="JobTitle"></label>
-                    <input asp-for="JobTitle" class="form-control" />
-                    <span asp-validation-for="JobTitle" class="text-danger"></span>
-                </div>
-                
-                <div class="form-group mb-3">
-                    <label asp-for="JobDescription">Mô tả công việc</label>
-                    <textarea asp-for="JobDescription" id="jobDescription" class="form-control"></textarea>
-                    <span asp-validation-for="JobDescription" class="text-danger"></span>
-                </div>
-
-                <div class="form-group mb-3">
-                    <label asp-for="JobRequirements">Yêu cầu công việc</label>
-                    <textarea asp-for="JobRequirements" id="jobRequirements" class="form-control"></textarea>
-                    <span asp-validation-for="JobRequirements" class="text-danger"></span>
-                </div>
-
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label asp-for="SalaryMin">Lương tối thiểu</label>
-                        <input asp-for="SalaryMin" class="form-control" type="number" />
-                        <span asp-validation-for="SalaryMin" class="text-danger"></span>
-                    </div>
-
-                    <div class="col-md-6 mb-3">
-                        <label asp-for="SalaryMax">Lương tối đa</label>
-                        <input asp-for="SalaryMax" class="form-control" type="number" />
-                        <span asp-validation-for="SalaryMax" class="text-danger"></span>
-                    </div>
-                </div>
-
-                <div class="row">
-                    <div class="col-md-4 mb-3">
-                        <label asp-for="ContactType">Loại liên hệ</label>
-                        <select asp-for="ContactType" asp-items="Model.ContactTypeOptions" class="form-control">
-                            <option value="">-- Chọn loại liên hệ --</option>
-                        </select>
-                        <span asp-validation-for="ContactType" class="text-danger"></span>
-                    </div>
-                    
-                                        <div class="col-md-4 mb-3">
-                        <label asp-for="JobPositionId">Cấp bậc</label>
-                        <select asp-for="JobPositionId" asp-items="Model.JobPositionOptions" class="form-control">
-                            <option value="">-- Chọn cấp bậc --</option>
-                        </select>
-                        <span asp-validation-for="JobPositionId" class="text-danger"></span>
-                    </div>
-                    
-                    <div class="col-md-4 mb-3">
-                        <label asp-for="JobTypeId">Loại công việc</label>
-                        <select asp-for="JobTypeId" asp-items="Model.JobTypeOptions" class="form-control">
-                            <option value="">-- Chọn loại công việc --</option>
-                        </select>
-                        <span asp-validation-for="JobTypeId" class="text-danger"></span>
-                    </div>
-                                    </div>
-                    
-                                    <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label asp-for="JobCategoryId">Ngành nghề</label>
-                        <select asp-for="JobCategoryId" asp-items="Model.JobCategoryOptions" class="form-control">
-                            <option value="">-- Chọn ngành nghề --</option>
-                        </select>
-                        <span asp-validation-for="JobCategoryId" class="text-danger"></span>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label asp-for="CVLanguageId">Ngôn ngữ CV</label>
-                        <select asp-for="CVLanguageId" asp-items="Model.CVLanguageOptions" class="form-control">
-                            <option value="">-- Chọn ngôn ngữ CV --</option>
-                        </select>
-                        <span asp-validation-for="CVLanguageId" class="text-danger"></span>
-                    </div>
-                </div>
-
-                <div class="form-group mb-3">
-                    <label asp-for="ExpiryDate">Hạn bài đăng</label>
-                    <input asp-for="ExpiryDate" class="form-control" type="date" />
-                    <span asp-validation-for="ExpiryDate" class="text-danger"></span>
-                </div>
-
-                <div class="form-group mb-3">
-                    <label asp-for="JobStatus">Trạng thái</label>
-                    <select asp-for="JobStatus" class="form-control">
-                        <option value="1">Open</option>
-                        <option value="0">Close</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="card-footer">
-                <button type="submit" class="btn btn-primary">Lưu bài đăng</button>
-                <a asp-action="Index" class="btn btn-secondary">Quay lại</a>
-            </div>
-        </form>
-                            <!-- CKEditor -->
-                    <script src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js"></script>
-                    
-                    <script>
-                        CKEDITOR.replace('jobDescription');
-                        CKEDITOR.replace('jobRequirements');
-                        document.querySelector("form").addEventListener("submit", function () {
-                            for (instance in CKEDITOR.instances) {
-                                CKEDITOR.instances[instance].updateElement();
-                            }
-                        });
-                    </script>
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-xl-10 col-lg-11">
+            <div class="card shadow border-0 rounded-4 overflow-hidden">
+                <div class="card-header border-0 text-white py-4" style="background: linear-gradient(135deg, #2563eb, #7c3aed);">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                        <div>
+                            <h3 class="mb-1 fw-bold">Tạo bài đăng mới</h3>
+                            <div class="opacity-75">Điền đầy đủ thông tin để đăng tuyển nhanh và chính xác.</div>
                         </div>
+                        <a asp-action="Index" class="btn btn-light rounded-pill px-4">
+                            Quay lại
+                        </a>
                     </div>
-        
-        @section Scripts {
-            <partial name="_ValidationScriptsPartial" />
+                </div>
+
+                <form asp-action="Create" method="post" id="createPostForm">
+                    @Html.AntiForgeryToken()
+
+                    <div class="card-body p-4 p-lg-5">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger rounded-3 mb-4"></div>
+
+                        <div class="mb-5">
+                            <div class="section-title-wrap mb-3">
+                                <h5 class="fw-bold mb-1">Thông tin cơ bản</h5>
+                                <p class="text-muted mb-0">Những nội dung chính sẽ hiển thị trên bài đăng.</p>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="JobTitle" class="form-label fw-semibold">Tiêu đề công việc</label>
+                                <input asp-for="JobTitle" class="form-control form-control-lg rounded-3" placeholder="Ví dụ: Backend Developer .NET" />
+                                <span asp-validation-for="JobTitle" class="text-danger small"></span>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="JobDescription" class="form-label fw-semibold">Mô tả công việc</label>
+                                <textarea asp-for="JobDescription" id="jobDescription" class="form-control rounded-3" rows="8"></textarea>
+                                <span asp-validation-for="JobDescription" class="text-danger small"></span>
+                            </div>
+
+                            <div class="mb-0">
+                                <label asp-for="JobRequirements" class="form-label fw-semibold">Yêu cầu công việc</label>
+                                <textarea asp-for="JobRequirements" id="jobRequirements" class="form-control rounded-3" rows="6"></textarea>
+                                <span asp-validation-for="JobRequirements" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <hr class="my-5" />
+
+                        <div class="mb-5">
+                            <div class="section-title-wrap mb-3">
+                                <h5 class="fw-bold mb-1">Phân loại công việc</h5>
+                                <p class="text-muted mb-0">Chọn đúng nhóm để dữ liệu lưu chính xác theo hệ thống.</p>
+                            </div>
+
+                            <div class="row g-4">
+                                <div class="col-md-4">
+                                    <label asp-for="ContactType" class="form-label fw-semibold">Loại liên hệ</label>
+                                    <select asp-for="ContactType" asp-items="Model.ContactTypeOptions" class="form-select rounded-3">
+                                        <option value="">-- Chọn loại liên hệ --</option>
+                                    </select>
+                                    <span asp-validation-for="ContactType" class="text-danger small"></span>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label asp-for="JobPositionId" class="form-label fw-semibold">Cấp bậc</label>
+                                    <select asp-for="JobPositionId" asp-items="Model.JobPositionOptions" class="form-select rounded-3">
+                                        <option value="">-- Chọn cấp bậc --</option>
+                                    </select>
+                                    <span asp-validation-for="JobPositionId" class="text-danger small"></span>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label asp-for="JobTypeId" class="form-label fw-semibold">Loại công việc</label>
+                                    <select asp-for="JobTypeId" asp-items="Model.JobTypeOptions" class="form-select rounded-3">
+                                        <option value="">-- Chọn loại công việc --</option>
+                                    </select>
+                                    <span asp-validation-for="JobTypeId" class="text-danger small"></span>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label asp-for="JobCategoryId" class="form-label fw-semibold">Ngành nghề</label>
+                                    <select asp-for="JobCategoryId" asp-items="Model.JobCategoryOptions" class="form-select rounded-3">
+                                        <option value="">-- Chọn ngành nghề --</option>
+                                    </select>
+                                    <span asp-validation-for="JobCategoryId" class="text-danger small"></span>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label asp-for="CVLanguageId" class="form-label fw-semibold">Ngôn ngữ CV</label>
+                                    <select asp-for="CVLanguageId" asp-items="Model.CVLanguageOptions" class="form-select rounded-3">
+                                        <option value="">-- Chọn ngôn ngữ CV --</option>
+                                    </select>
+                                    <span asp-validation-for="CVLanguageId" class="text-danger small"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="my-5" />
+
+                        <div class="mb-5">
+                            <div class="section-title-wrap mb-3">
+                                <h5 class="fw-bold mb-1">Lương và thời hạn</h5>
+                                <p class="text-muted mb-0">Thiết lập khoảng lương và trạng thái bài đăng.</p>
+                            </div>
+
+                            <div class="row g-4">
+                                <div class="col-md-4">
+                                    <label asp-for="SalaryMin" class="form-label fw-semibold">Lương tối thiểu</label>
+                                    <input asp-for="SalaryMin" class="form-control rounded-3" type="number" min="0" placeholder="Ví dụ: 1000" />
+                                    <span asp-validation-for="SalaryMin" class="text-danger small"></span>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label asp-for="SalaryMax" class="form-label fw-semibold">Lương tối đa</label>
+                                    <input asp-for="SalaryMax" class="form-control rounded-3" type="number" min="0" placeholder="Ví dụ: 2000" />
+                                    <span asp-validation-for="SalaryMax" class="text-danger small"></span>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label asp-for="ExpiryDate" class="form-label fw-semibold">Hạn bài đăng</label>
+                                    <input asp-for="ExpiryDate" class="form-control rounded-3" type="date" />
+                                    <span asp-validation-for="ExpiryDate" class="text-danger small"></span>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label asp-for="JobStatus" class="form-label fw-semibold">Trạng thái</label>
+                                    <select asp-for="JobStatus" class="form-select rounded-3">
+                                        <option value="1">Hiển thị</option>
+                                        <option value="0">Ẩn</option>
+                                    </select>
+                                    <span asp-validation-for="JobStatus" class="text-danger small"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="my-5" />
+
+                        <div class="mb-2">
+                            <div class="section-title-wrap mb-3">
+                                <h5 class="fw-bold mb-1">Văn phòng và từ khóa</h5>
+                                <p class="text-muted mb-0">Giữ Ctrl hoặc Command để chọn nhiều mục.</p>
+                            </div>
+                            @* Văn phòng *@
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label asp-for="OfficeText" class="form-label">Văn phòng áp dụng</label>
+                                        <textarea asp-for="OfficeText"
+                                                  class="form-control"
+                                                  rows="6"
+                                                  placeholder="Ví dụ: Hà Nội, Đà Nẵng"></textarea>
+                                        <span asp-validation-for="OfficeText" class="text-danger"></span>
+                                        <small class="text-muted">
+                                            Nhập nhiều văn phòng, ngăn cách bằng dấu phẩy hoặc xuống dòng.
+                                        </small>
+                                    </div>
+                                </div>
+                            
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label asp-for="KeywordText" class="form-label">Keyword công việc</label>
+                                        <textarea asp-for="KeywordText"
+                                                  class="form-control"
+                                                  rows="6"
+                                                  placeholder="Ví dụ: .NET, ASP.NET, Backend"></textarea>
+                                        <span asp-validation-for="KeywordText" class="text-danger"></span>
+                                        <small class="text-muted">
+                                            Nhập nhiều keyword, ngăn cách bằng dấu phẩy hoặc xuống dòng.
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                                   
+                              </div>
+          
+                              <div class="card-footer bg-white border-0 px-4 px-lg-5 pb-4">
+                                  <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
+                                      <div class="text-muted small">
+                                          Hãy kiểm tra kỹ nội dung trước khi lưu bài đăng.
+                                      </div>
+          
+                                      <div class="d-flex gap-2">
+                                          <a asp-action="Index" class="btn btn-light border rounded-pill px-4">Hủy</a>
+                                          <button type="submit" class="btn btn-primary rounded-pill px-4 shadow-sm">
+                                              Lưu bài đăng
+                                          </button>
+                                      </div>
+                                  </div>
+                              </div>
+                          </form>
+                      </div>
+                  </div>
+              </div>
+          </div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js"></script>
+    <script>
+        CKEDITOR.replace('jobDescription');
+        CKEDITOR.replace('jobRequirements');
+
+        document.getElementById("createPostForm").addEventListener("submit", function () {
+            for (const instance in CKEDITOR.instances) {
+                CKEDITOR.instances[instance].updateElement();
+            }
+        });
+
+        (function () {
+            const salaryMin = document.getElementById("SalaryMin");
+            const salaryMax = document.getElementById("SalaryMax");
+
+            function validateSalaryRange() {
+                if (!salaryMin || !salaryMax) return;
+
+                const min = parseInt(salaryMin.value || "0");
+                const max = parseInt(salaryMax.value || "0");
+
+                if (salaryMin.value && salaryMax.value && max < min) {
+                    salaryMax.setCustomValidity("Lương tối đa phải lớn hơn hoặc bằng lương tối thiểu.");
+                } else {
+                    salaryMax.setCustomValidity("");
+                }
+            }
+
+            salaryMin?.addEventListener("input", validateSalaryRange);
+            salaryMax?.addEventListener("input", validateSalaryRange);
+        })();
+    </script>
+
+    <style>
+        .form-control,
+        .form-select {
+            border-radius: 14px;
+            border: 1px solid #d1d5db;
+            padding-top: 0.75rem;
+            padding-bottom: 0.75rem;
         }
+
+        .form-control:focus,
+        .form-select:focus {
+            border-color: #6366f1;
+            box-shadow: 0 0 0 0.18rem rgba(99, 102, 241, 0.15);
+        }
+
+        textarea.form-control {
+            resize: vertical;
+        }
+
+        .section-title-wrap h5 {
+            color: #111827;
+        }
+
+        .section-title-wrap p {
+            font-size: 0.95rem;
+        }
+
+        select[multiple] {
+            min-height: 220px;
+        }
+
+        .alert-validation-valid {
+            display: none;
+        }
+    </style>
+}

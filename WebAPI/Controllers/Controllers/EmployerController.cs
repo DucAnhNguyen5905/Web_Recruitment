@@ -114,24 +114,20 @@ namespace Recruitment_API.Controllers
             }
         }
 
-        [HttpPut]
-        [RecuitmentAuthorizeAttribute("Employer_Update", "ISUPDATE")]
-        public async Task<IActionResult> Employer_Update([FromBody] EmployerUpdate_Request employerUpdate_Request)
-        {
-            try
-            {
-                var result = await _unitofWork._employerRepository.Update_Employer(employerUpdate_Request);
-                if (result == null)
-                {
-                    return NotFound();
-                }
-                return Ok(result);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal Server Error: {ex.Message}");
-            }
-        }
+//        [HttpPut]
+//        [RecuitmentAuthorizeAttribute("Employer_Update", "ISUPDATE")]
+//        public async Task<IActionResult> Employer_Update([FromBody] EmployerUpdate_Request employerInsert_Request)
+//        {
+//            try
+//            {
+//               
+//               
+//            }
+//            catch (Exception ex)
+//            {
+//                return StatusCode(500, $"Internal Server Error: {ex.Message}");
+//            }
+//        }
 
         [HttpPost("login")]
         public async Task<IActionResult> Employer_Login([FromBody] EmployerLogin_Request employerLogin_Request)

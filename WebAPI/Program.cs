@@ -8,6 +8,7 @@ using Recuitment_DataAccess.EFCore;
 using Recuitment_DataAccess.IRepository;
 using Recuitment_DataAccess.Recuitment_Unitofwork;
 using Recuitment_DataAccess.Repository;
+
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -49,8 +50,7 @@ builder.Services.AddSingleton<Microsoft.Extensions.Logging.ILoggerProvider, Micr
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddScoped<IEmployerRepository, EmployerRepository>();
-builder.Services.AddScoped<IJobPostingRepository, JobPostingRepository>();
+builder.Services.AddScoped<IMasterDataRepository, MasterDataRepository>();
 builder.Services.AddScoped<IUnitofWork, UnitofWork>();
 builder.Services.AddScoped<IApplicationDBConnection, ApplicationDBConnection>();
 builder.Services.AddScoped<IEmployerRepositoryDapper, EmployerRepositoryDapper>();
