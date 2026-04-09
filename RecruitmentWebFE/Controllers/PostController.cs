@@ -231,26 +231,15 @@ namespace RecruitmentWebFE.Controllers
         private List<int> MapKeywordTextToIds(string? keywordText, List<SelectListItem> keywordOptions)
         {
             var inputs = ParseTextList(keywordText);
-            if (!inputs.Any())
-                return new List<int>();
+            if (!inputs.Any()) return new List<int>();
 
-            var results = new List<int>();
-
-            foreach (var input in inputs)
-            {
-                var normalizedInput = input.Trim().ToLower();
-
-                var matchedOption = keywordOptions.FirstOrDefault(x =>
-                    !string.IsNullOrWhiteSpace(x.Text) &&
-                    x.Text.Trim().ToLower().Equals(normalizedInput));
-
-                if (matchedOption != null && int.TryParse(matchedOption.Value, out var keywordId))
-                {
-                    results.Add(keywordId);
-                }
-            }
-
-            return results.Distinct().ToList();
+            return keywordOptions
+                .Where(x => !string.IsNullOrWhiteSpace(x.Text) &&
+                            inputs.Any(i => string.Equals(i.Trim(), x.Text.Trim(), StringComparison.OrdinalIgnoreCase)))
+                .Select(x => int.TryParse(x.Value, out var id) ? id : 0)
+                .Where(id => id > 0)
+                .Distinct()
+                .ToList();
         }
         [HttpGet]
         public async Task<IActionResult> Edit(int id)
