@@ -76,6 +76,7 @@ namespace Recuitment_DataAccess.Repository
                 parameters,
                 commandType: CommandType.StoredProcedure);
 
+
             return result.ToList();
         }
 

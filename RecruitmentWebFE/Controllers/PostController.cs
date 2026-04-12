@@ -136,10 +136,10 @@ namespace RecruitmentWebFE.Controllers
                 return RedirectToAction("Index", "Login");
             }
 
-            // Build dropdown trước để có dữ liệu map text -> id
+            // Build dropdown  để có dữ liệu map text -> id
             model = await BuildDropdownsAsync(model, accessToken);
 
-            // validate model cơ bản trước
+            // validate model 
             if (!ModelState.IsValid)
             {
                 return View(model);

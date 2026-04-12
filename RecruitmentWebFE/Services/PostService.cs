@@ -87,7 +87,7 @@ namespace RecruitmentWebFE.Services
         {
             if (model.SalaryMin > model.SalaryMax)
             {
-                return (false, "Lương tối thiểu không được lớn hơn lương tối đa.");
+                return (false, "Lương tối thiểu lớn hơn lương tối đa !");
             }
 
             var request = new JobPostInsert_Request
