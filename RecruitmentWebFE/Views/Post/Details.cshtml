@@ -25,7 +25,9 @@
                 </tr>
                 <tr>
                     <th>Mô tả công việc</th>
-                    <td>@Model.Job_Description</td>
+                    <td>
+                       <textarea id="JobDescription" class="form-control" rows="8"></textarea>
+                        </td>
                 </tr>
                 <tr>
                     <th>Yêu cầu công việc</th>
@@ -103,3 +105,28 @@
         </div>
     </div>
 </div>
+ @section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js"></script>
+     <script>
+        if (document.getElementById('JobDescription') && !CKEDITOR.instances['JobDescription']) {
+            CKEDITOR.replace('JobDescription');
+        }
+
+        // if (document.getElementById('JobRequirements') && !CKEDITOR.instances['JobRequirements']) {
+        //     CKEDITOR.replace('JobRequirements');
+        // }
+    </script> 
+
+     <script> $(document).ready(function() {
+         CKEDITOR.instances['JobDescription'].setData('@Model.Job_Description', function() {
+
+        }); 
+     
+        }); 
+    </script>
+} 
+
+
+              
