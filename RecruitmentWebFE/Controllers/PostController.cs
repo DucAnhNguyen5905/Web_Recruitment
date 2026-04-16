@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using RecruitmentWebFE.Models;
 using RecruitmentWebFE.Services;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace RecruitmentWebFE.Controllers
 {
@@ -33,6 +34,9 @@ namespace RecruitmentWebFE.Controllers
                 {
                     return RedirectToAction("Index", "Login");
                 }
+                var handler = new JwtSecurityTokenHandler();
+                var jwt = handler.ReadJwtToken(accessToken);
+                var validTo = jwt.ValidTo;
 
                 var posts = await _postService.GetAllPostsAsync(accessToken);
                 TempData.Remove("ErrorMessage");

@@ -25,13 +25,15 @@
                 </tr>
                 <tr>
                     <th>Mô tả công việc</th>
-                    <td>
-                       <textarea id="JobDescription" class="form-control" rows="8"></textarea>
-                        </td>
+                     <td>
+                        <textarea id="JobDescription" class="form-control" rows="8"></textarea>
+                    </td>
                 </tr>
                 <tr>
                     <th>Yêu cầu công việc</th>
-                    <td>@Model.Job_Requirements</td>
+                    <td>
+                        <textarea id="JobRequirements" class="form-control" rows="8"></textarea>
+                    </td>
                 </tr>
                 <tr>
                     <th>Lương</th>
@@ -105,28 +107,27 @@
         </div>
     </div>
 </div>
- @section Scripts {
-    <partial name="_ValidationScriptsPartial" />
 
+@section Scripts {
     <script src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js"></script>
-     <script>
-        if (document.getElementById('JobDescription') && !CKEDITOR.instances['JobDescription']) {
-            CKEDITOR.replace('JobDescription');
-        }
+    <script>
+        const jobDescription = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Job_Description ?? ""));
+        const jobRequirements = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Job_Requirements ?? ""));
 
-        // if (document.getElementById('JobRequirements') && !CKEDITOR.instances['JobRequirements']) {
-        //     CKEDITOR.replace('JobRequirements');
-        // }
-    </script> 
+        CKEDITOR.replace('JobDescription');
+        CKEDITOR.replace('JobRequirements');
 
-     <script> $(document).ready(function() {
-         CKEDITOR.instances['JobDescription'].setData('@Model.Job_Description', function() {
+        CKEDITOR.on('instanceReady', function (ev) {
+            if (ev.editor.name === 'JobDescription') {
+                ev.editor.setData(jobDescription);
+            }
 
-        }); 
-     
-        }); 
+            if (ev.editor.name === 'JobRequirements') {
+                ev.editor.setData(jobRequirements);
+            }
+        });
     </script>
-} 
+}
 
 
               
