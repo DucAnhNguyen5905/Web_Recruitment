@@ -1,5 +1,6 @@
 ﻿using RecruitmentWebFE.Models;
 using Recuitment_Common;
+using Recuitment_DataAccess.Data_Object.RequestData;
 using Recuitment_Model.RequestData;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
@@ -147,25 +148,104 @@ namespace RecruitmentWebFE.Services
             return (false, $"Tạo bài đăng thất bại. HTTP {(int)response.StatusCode}");
         }
 
-        public async Task<bool> UpdateAsync(UpdatePostViewModel model, string accessToken)
+        public async Task<(bool Success, string Message)> UpdateAsync(UpdatePostViewModel model, string accessToken)
         {
+            if (model.SalaryMin > model.SalaryMax)
+            {
+                return (false, "Lương tối thiểu lớn hơn lương tối đa.");
+            }
+
+            var request = new JobPostUpdate_Request
+            {
+                Post_ID = model.Id,
+                Job_Title = model.JobTitle,
+                Job_Description = model.JobDescription,
+                Job_Requirements = model.JobRequirements,
+                Salary_min = model.SalaryMin,
+                Salary_max = model.SalaryMax,
+                Contact_Type = model.ContactType,
+                Job_Position_ID = model.JobPositionId,
+                Job_Type_ID = model.JobTypeId,
+                Job_Category_ID = model.JobCategoryId,
+                CV_Language_ID = model.CVLanguageId,
+                Expiry_Date = model.ExpiryDate,
+                PostStatus = model.JobStatus,
+                Office_List = model.OfficeAddressIds
+                    .Select(id => new OfficeItem { OfficeAddress_ID = id })
+                    .ToList(),
+                Keywords_List = model.JobKeywordIds
+                    .Select(id => new KeywordItem { Job_Keywords_ID = id })
+                    .ToList()
+            };
+
             var response = await HttpHelper.SendHttpRequestAsync(
                 HttpMethod.Put,
-                $"{BaseUrl}/api/jobpost/{model.Id}",
+                $"{BaseUrl}/api/jobpost",
                 accessToken,
-                model);
+                request);
 
-            return response.IsSuccessStatusCode;
+            var raw = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+            {
+                try
+                {
+                    using var doc = JsonDocument.Parse(raw);
+                    if (doc.RootElement.TryGetProperty("message", out var message))
+                    {
+                        return (true, message.GetString() ?? "Cập nhật bài đăng thành công.");
+                    }
+                }
+                catch
+                {
+                }
+
+                return (true, "Cập nhật bài đăng thành công.");
+            }
+
+            try
+            {
+                using var doc = JsonDocument.Parse(raw);
+                if (doc.RootElement.TryGetProperty("error", out var error))
+                {
+                    return (false, error.GetString() ?? "Cập nhật bài đăng thất bại.");
+                }
+
+                if (doc.RootElement.TryGetProperty("message", out var message))
+                {
+                    return (false, message.GetString() ?? "Cập nhật bài đăng thất bại.");
+                }
+            }
+            catch
+            {
+            }
+
+            return (false, $"Cập nhật bài đăng thất bại. HTTP {(int)response.StatusCode}");
         }
 
-        public async Task<bool> DeleteAsync(int id, string accessToken)
+        public async Task<(bool Success, string Message)> DeleteAsync(int id, string accessToken)
         {
             var response = await HttpHelper.SendHttpRequestAsync(
                 HttpMethod.Delete,
                 $"{BaseUrl}/api/jobpost/{id}",
                 accessToken);
 
-            return response.IsSuccessStatusCode;
+            var raw = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+                return (true, "Xóa bài đăng thành công.");
+
+            try
+            {
+                using var doc = JsonDocument.Parse(raw);
+                if (doc.RootElement.TryGetProperty("error", out var error))
+                    return (false, error.GetString() ?? "Xóa bài đăng thất bại.");
+                if (doc.RootElement.TryGetProperty("message", out var message))
+                    return (false, message.GetString() ?? "Xóa bài đăng thất bại.");
+            }
+            catch { }
+
+            return (false, $"Xóa bài đăng thất bại. HTTP {(int)response.StatusCode}");
         }
     }
 }

@@ -168,17 +168,76 @@ namespace Recruitment_API.Controllers
         }
 
 
-        [HttpPut()]
+        [Authorize]
+        [HttpPut("/api/jobpost")]
         public async Task<IActionResult> Update_JobPost([FromBody] JobPostUpdate_Request jobPostUpdate_Request)
         {
-            int result = await _jobpostingRepositoryDapper.Jobposting_Update(jobPostUpdate_Request);
-            return result switch
+            try
             {
-                1 => Ok(new { message = "Update Post Successful." }),
-                2 => Ok(new { message = "Update PostStatus Successfull. " }),
-                -2 => Conflict(new { error = "Title đã tồn tại." }),
-                _ => StatusCode(500, new { error = "Lỗi không xác định từ server." })
-            };
+                var employerIdClaim = User.FindFirst(ClaimTypes.PrimarySid)?.Value;
+                if (!int.TryParse(employerIdClaim, out int employerId))
+                {
+                    return Unauthorized(new { error = "Token không hợp lệ." });
+                }
+
+                jobPostUpdate_Request.Employer_ID = employerId;
+
+                if (jobPostUpdate_Request.Post_ID <= 0)
+                {
+                    return BadRequest(new { error = "Post_ID không hợp lệ." });
+                }
+
+                if (string.IsNullOrWhiteSpace(jobPostUpdate_Request.Job_Title))
+                {
+                    return BadRequest(new { error = "Tiêu đề công việc không được để trống." });
+                }
+
+                if (jobPostUpdate_Request.Office_List == null || !jobPostUpdate_Request.Office_List.Any())
+                {
+                    return BadRequest(new { error = "Vui lòng chọn ít nhất một văn phòng." });
+                }
+
+                if (jobPostUpdate_Request.Keywords_List == null || !jobPostUpdate_Request.Keywords_List.Any())
+                {
+                    return BadRequest(new { error = "Vui lòng chọn ít nhất một keyword." });
+                }
+
+                var existing = await _jobpostingRepositoryDapper.Get_JobPost_By_Id(
+                    new JobPostGetById_Request { Post_ID = jobPostUpdate_Request.Post_ID });
+
+                var post = existing?.FirstOrDefault();
+                if (post == null)
+                {
+                    return NotFound(new { error = "Không tìm thấy bài đăng." });
+                }
+
+                var isAdminClaim = User.FindFirst("IsAdmin")?.Value ?? "0";
+                bool isAdmin = isAdminClaim == "1";
+
+                if (!isAdmin && post.Employer_ID != employerId)
+                {
+                    return Forbid();
+                }
+
+                var result = await _jobpostingRepositoryDapper.Jobposting_Update(jobPostUpdate_Request);
+
+                return result switch
+                {
+                    1 => Ok(new { message = "Cập nhật bài đăng thành công." }),
+                    2 => Ok(new { message = "Cập nhật trạng thái bài đăng thành công." }),
+                    -2 => Conflict(new { error = "Title đã tồn tại." }),
+                    -1 => NotFound(new { error = "Không tìm thấy bản ghi cần cập nhật." }),
+                    _ => StatusCode(500, new { error = "Lỗi không xác định từ server." })
+                };
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
         }
 
         [HttpPatch("update-partial/{id}")]
@@ -195,17 +254,36 @@ namespace Recruitment_API.Controllers
             };
         }
 
-        [HttpDelete()]
-        public async Task<IActionResult> Delete_JobPost([FromBody] JobPostDelete_Request jobPostDelete_Request)
+        [Authorize]
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete_JobPost(int id)
         {
-            int result = await _jobpostingRepositoryDapper.Jobposting_Delete(jobPostDelete_Request);
+            var resultPost = await _jobpostingRepositoryDapper.Get_JobPost_By_Id(
+                new JobPostGetById_Request { Post_ID = id });
+
+            var post = resultPost?.FirstOrDefault();
+            if (post == null)
+                return NotFound(new { error = "Bài đăng không tồn tại." });
+
+            var employerIdClaim = User.FindFirst(ClaimTypes.PrimarySid)?.Value;
+            var isAdminClaim = User.FindFirst("IsAdmin")?.Value ?? "0";
+
+            if (!int.TryParse(employerIdClaim, out int currentEmployerId))
+                return Unauthorized(new { error = "Token không hợp lệ." });
+
+            bool isAdmin = isAdminClaim == "1";
+            if (!isAdmin && post.Employer_ID != currentEmployerId)
+                return Forbid();
+
+            int result = await _jobpostingRepositoryDapper.Jobposting_Delete(
+                new JobPostDelete_Request { Post_ID = id });
+
             return result switch
             {
-                1 => Ok(new { message = "Delete Successful." }),
-                -2 => Conflict(new { error = "Bài đăng không tồn tại." }),
+                1 => Ok(new { message = "Xóa bài đăng thành công." }),
+                -2 => NotFound(new { error = "Bài đăng không tồn tại." }),
                 _ => StatusCode(500, new { error = "Lỗi không xác định từ server." })
             };
-
         }
 
     }

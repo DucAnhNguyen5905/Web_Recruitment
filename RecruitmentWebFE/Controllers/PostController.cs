@@ -3,7 +3,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using RecruitmentWebFE.Models;
 using RecruitmentWebFE.Services;
+using Recuitment_Common;
+using System.Buffers.Text;
 using System.IdentityModel.Tokens.Jwt;
+
 
 namespace RecruitmentWebFE.Controllers
 {
@@ -129,42 +132,110 @@ namespace RecruitmentWebFE.Controllers
 
             return model;
         }
+        private async Task<UpdatePostViewModel> BuildDropdownsAsync(UpdatePostViewModel model, string accessToken)
+        {
+            var contactTypes = await _masterDataService.GetContactTypesAsync(accessToken);
+            var jobPositions = await _masterDataService.GetJobPositionsAsync(accessToken);
+            var jobTypes = await _masterDataService.GetJobTypesAsync(accessToken);
+            var jobCategories = await _masterDataService.GetJobCategoriesAsync(accessToken);
+            var cvLanguages = await _masterDataService.GetCvLanguagesAsync(accessToken);
+            var officeAddresses = await _masterDataService.GetOfficeAddressesAsync(accessToken);
+            var jobKeywords = await _masterDataService.GetJobKeywordsAsync(accessToken);
+
+            model.ContactTypeOptions = contactTypes
+                .Select(x => new SelectListItem(x.Name, x.Id))
+                .ToList();
+
+            model.JobPositionOptions = jobPositions
+                .Select(x => new SelectListItem(x.Name, x.Id))
+                .ToList();
+
+            model.JobTypeOptions = jobTypes
+                .Select(x => new SelectListItem(x.Name, x.Id))
+                .ToList();
+
+            model.JobCategoryOptions = jobCategories
+                .Select(x => new SelectListItem(x.Name, x.Id))
+                .ToList();
+
+            model.CVLanguageOptions = cvLanguages
+                .Select(x => new SelectListItem(x.Name, x.Id))
+                .ToList();
+
+            model.OfficeAddressOptions = officeAddresses
+                .Select(x => new SelectListItem(x.Name, x.Id))
+                .ToList();
+
+            model.JobKeywordOptions = jobKeywords
+                .Select(x => new SelectListItem(x.Name, x.Id))
+                .ToList();
+
+            return model;
+        }
+
+
+
+        private static List<int> ParseIdList(string? input)
+        {
+            if (string.IsNullOrWhiteSpace(input))
+            {
+                return new List<int>();
+            }
+
+            return input
+                .Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(x => x.Trim())
+                .Where(x => int.TryParse(x, out _))
+                .Select(int.Parse)
+                .Distinct()
+                .ToList();
+        }
+
+        private sealed class DropdownData
+        {
+            public List<SelectListItem> ContactTypeOptions { get; set; } = new();
+            public List<SelectListItem> JobPositionOptions { get; set; } = new();
+            public List<SelectListItem> JobTypeOptions { get; set; } = new();
+            public List<SelectListItem> JobCategoryOptions { get; set; } = new();
+            public List<SelectListItem> CVLanguageOptions { get; set; } = new();
+            public List<SelectListItem> OfficeAddressOptions { get; set; } = new();
+            public List<SelectListItem> JobKeywordOptions { get; set; } = new();
+        }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(CreatePostViewModel model)
         {
+
             var accessToken = GetAccessToken();
             if (string.IsNullOrWhiteSpace(accessToken))
             {
                 return RedirectToAction("Index", "Login");
             }
 
-            // Build dropdown  để có dữ liệu map text -> id
+            // Build dropdown  
             model = await BuildDropdownsAsync(model, accessToken);
 
-            // validate model 
-            if (!ModelState.IsValid)
+            if (model.OfficeAddressIds == null || !model.OfficeAddressIds.Any())
             {
-                return View(model);
+                ModelState.AddModelError(nameof(model.OfficeAddressIds), "Vui lòng chọn ít nhất một văn phòng.");
             }
 
-            // map OfficeText -> OfficeAddressIds
-            model.OfficeAddressIds = MapOfficeTextToIds(model.OfficeText, model.OfficeAddressOptions);
-
-            // map KeywordText -> JobKeywordIds
-            model.JobKeywordIds = MapKeywordTextToIds(model.KeywordText, model.JobKeywordOptions);
-
-            // validate sau khi map
-            if (!model.OfficeAddressIds.Any())
+            if (model.JobKeywordIds == null || !model.JobKeywordIds.Any())
             {
-                ModelState.AddModelError(nameof(model.OfficeText), "Không tìm thấy văn phòng hợp lệ từ nội dung đã nhập.");
+                ModelState.AddModelError(nameof(model.JobKeywordIds), "Vui lòng chọn ít nhất một keyword.");
             }
 
-            if (!model.JobKeywordIds.Any())
+            if (model.OfficeAddressIds == null || !model.OfficeAddressIds.Any())
             {
-                ModelState.AddModelError(nameof(model.KeywordText), "Không tìm thấy keyword hợp lệ từ nội dung đã nhập.");
+                ModelState.AddModelError(nameof(model.OfficeAddressIds), "Vui lòng chọn ít nhất một văn phòng.");
             }
+
+            if (model.JobKeywordIds == null || !model.JobKeywordIds.Any())
+            {
+                ModelState.AddModelError(nameof(model.JobKeywordIds), "Vui lòng chọn ít nhất một keyword.");
+            }
+
 
             if (!ModelState.IsValid)
             {
@@ -191,60 +262,8 @@ namespace RecruitmentWebFE.Controllers
                 return View(model);
             }
         }
-        private List<string> ParseTextList(string? input)
-        {
-            if (string.IsNullOrWhiteSpace(input))
-                return new List<string>();
 
-            return input
-                .Split(new[] { ',', ';', '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries)
-                .Select(x => x.Trim())
-                .Where(x => !string.IsNullOrWhiteSpace(x))
-                .Distinct(StringComparer.OrdinalIgnoreCase)
-                .ToList();
-        }
 
-        private List<int> MapOfficeTextToIds(string? officeText, List<SelectListItem> officeOptions)
-        {
-            var inputs = ParseTextList(officeText);
-            if (!inputs.Any())
-                return new List<int>();
-
-            var results = new List<int>();
-
-            foreach (var input in inputs)
-            {
-                var normalizedInput = input.Trim().ToLower();
-
-                var matchedOption = officeOptions.FirstOrDefault(x =>
-                    !string.IsNullOrWhiteSpace(x.Text) &&
-                    (
-                        x.Text.Trim().ToLower().Equals(normalizedInput) ||
-                        x.Text.Trim().ToLower().Contains(normalizedInput) ||
-                        normalizedInput.Contains(x.Text.Trim().ToLower())
-                    ));
-
-                if (matchedOption != null && int.TryParse(matchedOption.Value, out var officeId))
-                {
-                    results.Add(officeId);
-                }
-            }
-
-            return results.Distinct().ToList();
-        }
-        private List<int> MapKeywordTextToIds(string? keywordText, List<SelectListItem> keywordOptions)
-        {
-            var inputs = ParseTextList(keywordText);
-            if (!inputs.Any()) return new List<int>();
-
-            return keywordOptions
-                .Where(x => !string.IsNullOrWhiteSpace(x.Text) &&
-                            inputs.Any(i => string.Equals(i.Trim(), x.Text.Trim(), StringComparison.OrdinalIgnoreCase)))
-                .Select(x => int.TryParse(x.Value, out var id) ? id : 0)
-                .Where(id => id > 0)
-                .Distinct()
-                .ToList();
-        }
         [HttpGet]
         public async Task<IActionResult> Edit(int id)
         {
@@ -268,8 +287,22 @@ namespace RecruitmentWebFE.Controllers
                 var model = new UpdatePostViewModel
                 {
                     Id = post.Post_ID,
-                    JobTitle = post.Job_Title
+                    JobTitle = post.Job_Title,
+                    JobDescription = post.Job_Description,
+                    JobRequirements = post.Job_Requirements,
+                    SalaryMin = post.Salary_min,
+                    SalaryMax = post.Salary_max,
+                    ContactType = post.Contact_Type,
+                    JobPositionId = post.Job_Position_ID,
+                    JobTypeId = post.Job_Type_ID,
+                    JobCategoryId = post.Job_Category_ID,
+                    CVLanguageId = post.CV_Language_ID,
+                    ExpiryDate = post.Expiry_Date,
+                    JobStatus = post.PostStatus,
+                    OfficeAddressIds = ParseIdList(post.OfficeAddress_IDs),
+                    JobKeywordIds = ParseIdList(post.Keyword_IDs)
                 };
+                model = await BuildDropdownsAsync(model, accessToken);
 
                 return View(model);
             }
@@ -299,28 +332,44 @@ namespace RecruitmentWebFE.Controllers
 
             var success = await _postService.UpdateAsync(model, accessToken);
 
-            if (!success)
+
+
+            var result = await _postService.UpdateAsync(model, accessToken);
+            if (!result.Success)
             {
-                ModelState.AddModelError(string.Empty, "Cập nhật bài đăng thất bại.");
+                ModelState.AddModelError(string.Empty, result.Message);
                 return View(model);
             }
 
+            TempData["SuccessMessage"] = result.Message;
             return RedirectToAction(nameof(Index));
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+
         public async Task<IActionResult> Delete(int id)
         {
-            var accessToken = GetAccessToken();
-
-            if (string.IsNullOrWhiteSpace(accessToken))
+            try
             {
-                return RedirectToAction("Index", "Login");
-            }
+                var accessToken = GetAccessToken();
+                if (string.IsNullOrWhiteSpace(accessToken))
+                    return RedirectToAction("Index", "Login");
 
-            await _postService.DeleteAsync(id, accessToken);
-            return RedirectToAction(nameof(Index));
+                var (success, message) = await _postService.DeleteAsync(id, accessToken);
+
+                TempData[success ? "SuccessMessage" : "ErrorMessage"] = message;
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi khi xóa bài đăng {PostId}", id);
+                TempData["ErrorMessage"] = "Không thể xóa bài đăng.";
+                return RedirectToAction(nameof(Index));
+            }
         }
     }
+
+
+
 }

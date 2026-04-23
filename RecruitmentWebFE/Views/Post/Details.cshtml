@@ -105,6 +105,11 @@
                 }
             </table>
         </div>
+        <form asp-action="Delete" asp-route-id="@Model.Post_ID" method="post"
+               onsubmit="return confirm('Bạn có chắc muốn xóa bài đăng này không?');">
+             @Html.AntiForgeryToken()
+             <button type="submit" class="btn btn-danger">Xóa</button>
+        </form>
     </div>
 </div>
 
@@ -116,7 +121,9 @@
 
         CKEDITOR.replace('JobDescription');
         CKEDITOR.replace('JobRequirements');
-
+        CKEDITOR.editorConfig = function( config ) {
+        config.versionCheck = false;
+        };
         CKEDITOR.on('instanceReady', function (ev) {
             if (ev.editor.name === 'JobDescription') {
                 ev.editor.setData(jobDescription);

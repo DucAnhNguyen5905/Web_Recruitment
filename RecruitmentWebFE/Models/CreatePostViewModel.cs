@@ -41,17 +41,14 @@ namespace RecruitmentWebFE.Models
         public DateTime? ExpiryDate { get; set; }
 
         public int JobStatus { get; set; } = 1;
-        // Text user nhập
-        [Required(ErrorMessage = "Vui lòng nhập ít nhất một văn phòng")]
-        public string? OfficeText { get; set; }
-
-        [Required(ErrorMessage = "Vui lòng nhập ít nhất một keyword")]
-        public string? KeywordText { get; set; }
-
+        
+        [MinLength(1, ErrorMessage = "Vui lòng chọn văn phòng")]
         public List<int> OfficeAddressIds { get; set; } = new();
 
-
+        [MinLength(1, ErrorMessage = "Vui lòng chọn keyword")]
         public List<int> JobKeywordIds { get; set; } = new();
+
+
 
         public List<SelectListItem> ContactTypeOptions { get; set; } = new();
         public List<SelectListItem> JobPositionOptions { get; set; } = new();

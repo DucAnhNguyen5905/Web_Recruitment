@@ -18,7 +18,7 @@ namespace RecruitmentWebFE.Controllers
 
         [HttpGet]
         public IActionResult Index()
-        {
+            {
             var isLoggedIn = HasCookie("AccessToken");
             if (isLoggedIn)
             {
@@ -49,7 +49,7 @@ namespace RecruitmentWebFE.Controllers
                 HttpOnly = true,
                 Secure = false, 
                 SameSite = SameSiteMode.Lax,
-                Expires = DateTimeOffset.UtcNow.AddHours(1)
+                Expires = DateTimeOffset.UtcNow.AddHours(1) 
             });
             var displayName = !string.IsNullOrWhiteSpace(result.name)
                 ? result.name

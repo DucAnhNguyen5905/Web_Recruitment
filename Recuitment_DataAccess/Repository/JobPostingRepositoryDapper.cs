@@ -69,7 +69,7 @@ namespace Recuitment_DataAccess.Repository
         {
             var param = new DynamicParameters();
 
-            
+            param.Add("Post_ID", requestData.Post_ID);
             param.Add("Employer_ID", requestData.Employer_ID);
             param.Add("Job_Title", requestData.Job_Title);
             param.Add("Job_Description", requestData.Job_Description);
@@ -79,14 +79,29 @@ namespace Recuitment_DataAccess.Repository
             param.Add("Contact_Type", requestData.Contact_Type);
             param.Add("Job_Position_ID", requestData.Job_Position_ID);
             param.Add("Job_Type_ID", requestData.Job_Type_ID);
+            param.Add("Job_Category_ID", requestData.Job_Category_ID);
             param.Add("CV_Language_ID", requestData.CV_Language_ID);
+
+            var officeJson = JsonConvert.SerializeObject(requestData.Office_List);
+            var keywordJson = JsonConvert.SerializeObject(requestData.Keywords_List);
+
+            param.Add("OfficeListJson", officeJson);
+            param.Add("KeywordListJson", keywordJson);
+
+            param.Add("Expiry_Date",
+                requestData.Expiry_Date.HasValue
+                    ? (object)requestData.Expiry_Date.Value.AddHours(7)
+                    : DBNull.Value);
+
             param.Add("PostStatus", requestData.PostStatus);
             param.Add("ResponseCode", dbType: DbType.Int32, direction: ParameterDirection.Output);
 
-            await DbConnection.ExecuteAsync("SP_JobPost_Update", param, commandType: CommandType.StoredProcedure);
+            await DbConnection.ExecuteAsync(
+                "SP_JobPost_Update",
+                param,
+                commandType: CommandType.StoredProcedure);
 
-            var response = param.Get<int>("ResponseCode");
-            return response;
+            return param.Get<int>("ResponseCode");
         }
 
         public async Task<List<JobPost>>Get_All_JobPosts(JobPostGetAll_Request requestData)

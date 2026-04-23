@@ -1,4 +1,5 @@
 ﻿@model RecruitmentWebFE.Models.CreatePostViewModel
+
 @{
     ViewData["Title"] = "Tạo bài đăng mới";
     Layout = "~/Views/Shared/_Layout.cshtml";
@@ -21,6 +22,7 @@
     <div class="container-fluid">
         <form asp-action="Create" method="post">
             @Html.AntiForgeryToken()
+            <input asp-for="JobStatus" type="hidden" />
 
             <div class="card shadow-sm">
                 <div class="card-body">
@@ -37,7 +39,7 @@
                         <textarea asp-for="JobDescription" id="JobDescription" class="form-control" rows="8"></textarea>
                         <span asp-validation-for="JobDescription" class="text-danger"></span>
                     </div>
-                    
+
                     <div class="mb-3">
                         <label asp-for="JobRequirements" class="form-label fw-semibold">Yêu cầu công việc</label>
                         <textarea asp-for="JobRequirements" id="JobRequirements" class="form-control" rows="8"></textarea>
@@ -50,6 +52,7 @@
                             <input asp-for="SalaryMin" type="number" class="form-control" />
                             <span asp-validation-for="SalaryMin" class="text-danger"></span>
                         </div>
+
                         <div class="col-md-6 mb-3">
                             <label asp-for="SalaryMax" class="form-label fw-semibold">Lương tối đa</label>
                             <input asp-for="SalaryMax" type="number" class="form-control" />
@@ -107,22 +110,28 @@
                         </div>
                     </div>
 
-                    <hr class="my-4" />
+                    <div class="mb-4">
+                        <label asp-for="OfficeAddressIds" class="form-label fw-semibold">Văn phòng áp dụng</label>
+                        <select asp-for="OfficeAddressIds"
+                                asp-items="Model.OfficeAddressOptions"
+                                class="form-select"
+                                multiple
+                                size="6">
+                        </select>
+                        <div class="form-text">Giữ Ctrl hoặc Shift để chọn nhiều giá trị.</div>
+                        <span asp-validation-for="OfficeAddressIds" class="text-danger"></span>
+                    </div>
 
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label asp-for="OfficeText" class="form-label fw-semibold">Văn phòng áp dụng</label>
-                            <textarea asp-for="OfficeText" class="form-control" rows="5"></textarea>
-                            <span asp-validation-for="OfficeText" class="text-danger"></span>
-                            <div class="form-text">ngăn cách bằng dấu phẩy/ xuống dòng.</div>
-                        </div>
-
-                        <div class="col-md-6 mb-3">
-                            <label asp-for="KeywordText" class="form-label fw-semibold">Keyword công việc</label>
-                            <textarea asp-for="KeywordText" class="form-control" rows="5"></textarea>
-                            <span asp-validation-for="KeywordText" class="text-danger"></span>
-                            <div class="form-text">ngăn cách bằng dấu phẩy/ xuống dòng.</div>
-                        </div>
+                    <div class="mb-4">
+                        <label asp-for="JobKeywordIds" class="form-label fw-semibold">Keyword công việc</label>
+                        <select asp-for="JobKeywordIds"
+                                asp-items="Model.JobKeywordOptions"
+                                class="form-select"
+                                multiple
+                                size="6">
+                        </select>
+                        <div class="form-text">Giữ Ctrl hoặc Shift để chọn nhiều giá trị.</div>
+                        <span asp-validation-for="JobKeywordIds" class="text-danger"></span>
                     </div>
                 </div>
 
@@ -149,4 +158,3 @@
         }
     </script>
 }
-
